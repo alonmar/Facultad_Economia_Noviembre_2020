@@ -1,0 +1,142 @@
+---
+title: "R Notebook"
+output: html_notebook
+author:
+  - name: "Alonso Melgar López"
+    url: https://github.com/alonmar
+    
+---
+
+# Cargamos librerias
+
+```{r}
+library(tidyverse)
+library(plotly)
+```
+
+# Cargamos datos
+
+```{r}
+houses <- read_csv("data/casas_boston - casas_boston.csv")
+houses
+```
+
+```{r}
+p <- plot_ly(x=houses$phab, y=houses$spob, z=houses$medv, type = "scatter3d", color = houses$medv) %>% 
+  layout(scene = list(xaxis = list(title = "Promedio de habitaciones"),
+                      yaxis = list(title = "Estatus de la población"),
+                      zaxis = list(title = "Valor medio de la vivienda")
+    
+  ))
+# %>% ctrl + shift + m
+# Creamos una grafica 3d interactiva y la guardamos en html
+htmlwidgets::saveWidget(p, "grafica_3d.html")
+p
+```
+
+$$  Y_i = \beta_0 + \beta_1 X_1 +\beta_2 X_2 + ... + u_i $$
+
+$$ \sum^n_{i = 1} (Y_i - \widehat{Y_i})^2  $$
+
+$$ \beta = (X^TX)^{-1}X^Ty $$
+
+```{r}
+y <- houses$medv
+```
+
+```{r}
+X <- as.matrix(houses[,-1])
+X <- cbind(1, X)
+X
+```
+
+
+```{r}
+betas <- solve(t(X) %*% X) %*% t(X) %*% y
+betas <- round(betas, 4)
+betas
+```
+
+```{r}
+lm_mod <- lm(medv ~  . , data = houses)
+lm_mod
+```
+
+# Anova
+Veremos si existe mejora o no, al agregar una nueva variable al modelo
+```{r}
+lm_mod1 <- lm(medv ~ 1, data = houses)
+lm_mod2 <- lm(medv ~ phab, data = houses)
+lm_mod3 <- lm(medv ~ phab + spob, data = houses)
+
+anova(lm_mod2, lm_mod3)
+
+summary(lm_mod3)
+```
+
+# variables categoricas
+
+variables dummy
+
+```{r}
+library(carData)
+Salaries
+```
+
+$$ y_i = \beta_0 + \beta_1 x_i + u_i $$
+
+1 si es hombre
+0 si es mujer
+
+En caso de que sea hombre
+$$ \beta_0 + \beta_1 x_i $$
+En caso de que sea mujer
+$$ \beta_0 $$
+
+
+```{r}
+model <- lm(salary ~ sex, data = Salaries)
+summary(model)
+```
+
+```{r}
+Salaries$female <- ifelse(Salaries$sex == "Female",
+                          1,
+                          0)
+
+Salaries
+```
+
+```{r}
+model_new <- lm(salary ~ female, data = Salaries)
+summary(model_new)
+```
+
+```{r}
+anova(model, model_new)
+```
+
+# ejemplo
+
+```{r}
+set.seed(8812)
+y <- c(rnorm(10, mean = 0, sd=1),
+       rnorm(10, mean = -0.5, sd=1),
+       rnorm(10, mean = 0.5, sd=1)
+       )
+g <- rep(c("a", "b", "c"), each = 10)
+
+data <- data_frame(y, g)
+data
+```
+
+```{r}
+model <- lm(y ~ g, data = data)
+summary(model)
+```
+
+```{r}
+anova(model)
+```
+
+

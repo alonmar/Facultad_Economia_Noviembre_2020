@@ -1,0 +1,52 @@
+---
+title: "R Notebook"
+output: html_notebook
+author:
+  - name: "Alonso Melgar López"
+    url: https://github.com/alonmar
+    
+---
+
+Una función que eleve al cuadrado cualquier número
+
+```{r}
+
+cuadrado <- function(x) {
+  return(x^2)
+}
+
+```
+
+```{r}
+cuadrado(6)
+```
+función que nos regrese el área de un rectángulo
+
+```{r}
+calcula_area_del_rectangulo <- function(a, b) {
+  # a = altura
+  # b = base
+  area <- b*a
+  
+  return(area)
+}
+```
+
+```{r}
+calcula_area_del_rectangulo(4, 5)
+```
+
+Teorema de Pitágoras
+
+```{r}
+calcula_pitagoras <- function(a,b) {
+  hipotenusa <- sqrt((a^2+b^2))
+  
+  return(hipotenusa)
+}
+
+
+calcula_pitagoras(3,4)
+```
+
+

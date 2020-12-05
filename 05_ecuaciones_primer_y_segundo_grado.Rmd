@@ -1,0 +1,179 @@
+---
+title: "R Notebook"
+author: "Alonso Melgar López"
+output:
+  pdf_document: default
+  html_notebook: default
+    
+---
+
+# Ecuación de la recta
+
+$$ y = mx+b  $$
+
+# Cargamos librerias
+
+```{r}
+#install.packages("tidyverse")
+library(tidyverse)
+#library(dplyr)
+```
+
+```{r}
+# creamos una función que calcula los valores de y según ciertos valores
+ecu_recta <- function(m, b, x) {
+  
+  y <- m * x + b
+  
+  return(data.frame( resultado_x = x, resultado_y = y ))
+  
+}
+```
+
+```{r}
+x <- 0:50
+
+recta <- ecu_recta(m=.3, b=3, x=x)
+recta
+```
+
+```{r}
+#graficamos
+p <- ggplot() +
+  geom_point(
+    data = recta, 
+    aes(x=resultado_x, y=resultado_y)
+             ) +
+  geom_vline(xintercept = 0) +
+  geom_hline(yintercept = 0) 
+
+p
+```
+
+
+```{r}
+# Agregamos distintas rectas
+recta_2 <- ecu_recta(m=1, x=x, b=3)
+recta_3 <- ecu_recta(m=2, x=x, b=3)
+p +
+  geom_line(data = recta_2, aes(x=resultado_x,y=resultado_y), color = "red") +
+  geom_line(data = recta_3, aes(x=resultado_x,y=resultado_x), color = "blue" )
+```
+
+
+```{r}
+x <- 0:50
+recta <- ecu_recta(m=0, x=x, b=3)
+
+p <- ggplot() +
+  geom_line(data = recta, aes(x=resultado_x, y = resultado_y)) +
+  geom_vline(xintercept = 0) +
+  geom_hline(yintercept = 0)
+
+# Agregamos multiples rectas
+for (i in 1:10) {
+  new_recta <- ecu_recta(m=i, x=x, b=3)
+  
+  p <- p +
+    geom_line(data = new_recta,
+              aes(x=resultado_x, y=resultado_y),
+              color = i)
+}
+p
+```
+
+```{r}
+x <- 0:50
+recta <- ecu_recta(m=1, x=x, b=0)
+
+p <- ggplot() +
+  geom_line(data = recta, aes(x=resultado_x, y = resultado_y)) +
+  geom_vline(xintercept = 0) +
+  geom_hline(yintercept = 0)
+
+for (i in 1:10) {
+  new_recta <- ecu_recta(m=1, x=x, b=i)
+  
+  p <- p +
+    geom_line(data = new_recta,
+              aes(x=resultado_x, y=resultado_y),
+              color = i)
+}
+p
+```
+
+# Segundo grado
+
+$$ ax^2 + bx + c = 0 $$
+
+```{r}
+calcula_segundo_grado <- function(x, a, b, c) {
+  
+  y <- a * x^2 + b * x + c
+  curva <- data.frame(resultado_x=x, resultado_y=y)
+  
+  return(curva)
+}
+```
+
+```{r}
+x <- -6:5
+
+curva_resultado <- calcula_segundo_grado(x=x, a=2, b=3, c=-2)
+curva_resultado
+```
+
+```{r}
+ggplot() +
+  geom_line(data = curva_resultado,
+            aes(x=resultado_x, y=resultado_y),
+            color = "red"
+            ) +
+  geom_vline(xintercept = 0) +
+  geom_hline(yintercept = 0)
+```
+
+# Raices para ecuaciones de segundo grado
+
+$$ \frac{-b \pm \sqrt{b^{2} - 4ac}}{2a}  $$
+
+```{r}
+raices <- function(b, a, c) {
+  raiz <- sqrt(b^2 - (4 * a * c))
+  
+  primer_x <- (-b + raiz)/(2 * a)
+  segunda_x <- (-b - raiz)/(2 * a)
+  
+  return(c(primer_x, segunda_x))
+}
+
+```
+
+```{r}
+raices(a=2, b=3, c=-2)
+```
+
+
+```{r}
+# Unimos lo anterior en una sola función
+calcula_segundo_grado <- function(x, a, b, c, raiz = FALSE) {
+  
+  if(raiz) {
+    raices_resultado <- raices(b, a, c)
+    return(raices_resultado)
+    
+  } else {
+    
+    y <- a * x^2 + b * x + c
+    curva <- data.frame(resultado_x=x, resultado_y=y)
+    
+    return(curva)
+  }
+  
+}
+```
+
+```{r}
+calcula_segundo_grado(x=x,a=1,b=1,c=-3, raiz = TRUE)
+```
+

@@ -1,0 +1,142 @@
+---
+title: "R Notebook"
+output: html_notebook
+author:
+  - name: "Alonso Melgar López"
+    url: https://github.com/alonmar
+    
+---
+
+# Funciones
+## funciones sin parametros
+
+```{r}
+
+mi_primer_funcion <- function() {
+  print("Hola amigos de R!!!")
+}
+
+```
+
+```{r}
+mi_primer_funcion()
+```
+
+## funciones con un parametro
+```{r}
+
+f <- function(num) {
+  for (i in 1:num) {
+    print("hola")
+  }
+}
+```
+
+```{r}
+f(num = 2)
+```
+
+## Ejemplos
+```{r}
+promedio <- function(x) {
+  sum(x)/length(x)
+}
+```
+
+```{r}
+x <- 1:20
+
+promedio(x)
+
+mean(x)
+```
+
+```{r}
+inverso <- function(x) {
+  x <- 1/x
+  return(x)
+}
+```
+
+```{r}
+inverso(1:10)
+```
+
+## funciones con dos parametros
+
+```{r}
+potencia <- function(x, b) {
+  result <- x ^ b
+  
+  print(
+    paste(x, "elavado a la potencia de", b, "es:", result)
+    )
+}
+```
+
+```{r}
+potencia(x = 5, b = 12)
+```
+
+# funciones con sentencias if - else
+
+```{r}
+amo_matematicas <- function(respuesta) {
+  if(respuesta == "si"){
+    print("Genial!!")
+  } else if(respuesta == "no"){
+    print("Que triste!!")
+  } else {
+    print("respuesta no valida")
+  }
+  
+}
+```
+
+```{r}
+amo_matematicas(respuesta = "si")
+```
+
+```{r}
+amo_matematicas <- function(respuesta) {
+  if(is.character(respuesta)){
+    if(respuesta == "si"){
+    print("Genial!!")
+  } else if(respuesta == "no"){
+    print("Que triste!!")
+  } else {
+    print("respuesta no valida")
+  }
+  } else {
+    print("la respuesta debe de ser texto")
+  }
+  
+  
+}
+```
+
+```{r}
+amo_matematicas(3.14)
+```
+
+
+
+```{r}
+# suma de tres numeros
+suma_de_tres_numeros <- function(a, b = 2, c = 3) {
+  result <- a + b + c
+  print(result)
+}
+```
+
+```{r}
+suma_de_tres_numeros(c = 4, a = 3, b = 1)
+```
+
+
+```{r}
+sum_mpg <- sum(mtcars$mpg)
+```
+
+
+

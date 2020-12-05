@@ -1,0 +1,95 @@
+---
+title: "Rmarkdown test"
+author: "Alonso Melgar López"
+date: "20/11/2020"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+
+*italic* _italic_
+**bold** __bold__
+ 
+`codigo extenso`
+
+
+superindices^2^ y subindices~2~
+
+
+# Encabezado primer nivel
+
+## Encabezado de segundo nivel
+
+
+### encabezado de tercer nivel
+
+listas
+
+- Un elemento
+- Un elemento
+- Un elemento
+    - otro elemento
+    - otro elemento
+
+
+1. Primer elemento
+2. Segundo elemento
+    - un subelemento
+
+Citas
+
+> "La ciencia ... está llena de errores; pero de errores que conviene conocer, porque conducen poco a poco a la verdad. "
+>
+> --- Julio Verne
+
+<www.google.com>
+
+da click [aquí](www.google.com)
+
+
+  Primer cabecera  | Segunda cabecera
+------------------- | ------------------
+contenido de celda  | contenido de celda
+contenido de celda  | contenido de celda
+
+```{r}
+mean(c(1:10))
+```
+
+```{r}
+library(ggplot2)
+ggplot() +
+  geom_point(data = mtcars, 
+             aes(x=mpg, 
+                 y=hp)) +
+  facet_wrap(~am)
+```
+
+```{r}
+knitr::kable(
+  mtcars[1:5, ]
+  )
+```
+
+La suma de 5, 2, 1 es: `r sum(c(5,2,1))`
+
+```{r include=FALSE}
+x <- 6
+```
+
+para un círculo de radio `r x`,
+el area es de: `r pi*x^2`
+
+$$ \begin{array}{ccc}
+x_{11} & x_{12} & x_{13}\\
+x_{21} & x_{22} & x_{23}
+\end{array}$$
+
+
+
+
+
+
+
+
+

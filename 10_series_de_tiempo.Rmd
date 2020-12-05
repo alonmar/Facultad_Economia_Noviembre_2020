@@ -1,0 +1,386 @@
+---
+title: "R Notebook"
+output: html_notebook
+author:
+  - name: "Alonso Melgar López"
+    url: https://github.com/alonmar
+    
+---
+
+# Cargamos librerias
+
+```{r}
+library(tidyverse)
+library(forecast)
+library(timetk)
+```
+
+# Simulación de datos
+
+```{r}
+set.seed(123)
+t <- seq(from = 1, to = 100, by = 1) + 10 + rnorm(100, sd=7)
+plot(t)
+```
+
+```{r}
+ts_series <- ts(t, start = c(2000, 1), 
+                frequency = 4)
+print(ts_series)
+```
+
+```{r}
+set.seed(123)
+seq <- seq(from = 1, to = 100, by = 1) + 10
+
+ts1 <- seq + rnorm(100, sd=3)
+ts2 <- seq + rnorm(100, sd=12)
+ts3 <- seq^2 + rnorm(100, sd=300)
+
+tsm <- cbind(ts1, ts2, ts3)
+tsm <- ts(tsm, frequency = 4, start = c(2000, 1))
+dim(tsm)
+```
+
+```{r}
+plot(tsm)
+```
+
+```{r}
+# graficamos
+autoplot(tsm,
+         facets = T)
+```
+
+```{r}
+# Subset
+ts_window <- window(tsm, 
+                    start = c(2000, 1), 
+                    end = c(2012, 1)) 
+ts_window
+```
+
+```{r}
+plot(decompose(ts_window[ , 2]))
+```
+
+```{r}
+start(tsm)
+end(tsm)
+frequency(tsm)
+```
+
+# Retardos en una serie de tiempo
+
+```{r}
+ts_lag <- stats::lag(tsm, 1)
+#tsm
+#ts_lag
+
+cbind(tsm, ts_lag)
+```
+
+```{r}
+ts_diff <- diff(tsm, lag = 2)
+ts_diff
+
+```
+
+```{r}
+autoplot(ts_diff, facets = T)
+```
+
+# Ejemplo con datos reales
+
+## Cargamos datos
+```{r}
+data <- read_csv("data/Evolucion-salario-promedio-mensual-en-Oaxaca--diferenciando-trabajadores-formales-e-informales.csv")
+data
+```
+
+```{r}
+empleo_formal <- data %>% 
+  filter(`Classification of Formal and Informal Jobs of the First Activity` == "Empleo Formal") %>% 
+  pull("Monthly Wage")
+
+empleo_informal <- data %>% 
+  filter(`Classification of Formal and Informal Jobs of the First Activity` == "Empleo Informal") %>% 
+  pull("Monthly Wage")
+
+#empleo_formal
+#empleo_informal
+```
+
+```{r}
+ts_empleo_formal <- ts(empleo_formal, 
+                       frequency = 4,
+                       start = c(2010, 1)
+                       )
+
+ts_empleo_informal <- ts(empleo_informal,
+                         frequency = 4,
+                         start = c(2010, 1))
+#ts_empleo_formal
+#ts_empleo_informal
+```
+ 
+```{r }
+ts_empleo <- cbind(ts_empleo_formal, ts_empleo_informal)
+ts_empleo
+```
+
+```{r}
+plot(decompose(ts_empleo[,1]))
+```
+
+## Estacionariedad 
+
+Hablaremos de estacionariedad cuando no muestra una tendencia clara positiva o 
+negativa
+
+```{r}
+autoplot(ts_empleo,
+         color="red",
+         facets = T) +
+  labs(title = "Salarios trimestrales",
+       subtitle = "Formal vs Informal",
+       y = "$",
+       x = "Trimestre")
+```
+
+## Estacionalidad 
+La estacionalidad se refiere al hecho de tener un patrón con cierta recurrencia
+
+```{r echo=FALSE}
+ggseasonplot(ts_empleo[,2])
+```
+
+
+```{r}
+ggsubseriesplot(ts_empleo[,2])
+```
+
+```{r}
+ggseasonplot(ts_empleo[,2], polar = T)
+```
+
+## autocorrelación
+
+$$ r_{k} = \frac{\sum\limits_{t=k+1}^T (y_{t}-\bar{y})(y_{t-k}-\bar{y})}
+ {\sum\limits_{t=1}^T (y_{t}-\bar{y})^2} $$
+
+# Correlograma
+
+## ACF FAC
+
+```{r}
+ggAcf(ts_empleo_formal, plot = T, lag = 10)
+```
+
+```{r}
+ggAcf(ts_empleo_informal, plot = F, lag = 3)
+```
+
+
+```{r}
+autoplot(AirPassengers)
+```
+
+```{r}
+ggseasonplot(AirPassengers)
+```
+
+```{r}
+ggAcf(AirPassengers)
+```
+
+```{r}
+set.seed(2020)
+y <- ts(rnorm(30))
+
+autoplot(y)
+
+
+```
+
+```{r}
+ggAcf(y, plot = F)
+ggAcf(y, plot = T)
+```
+
+# Ejemplo con datos reales
+
+# Covid-19
+
+```{r}
+# Cargamos datos
+data_covid <- read_csv("data/Casos-positivos-diarios-en-Oaxaca.csv")
+
+data_covid_oaxaca <- data_covid %>% 
+  filter(State == "Oaxaca")
+
+data_covid_oaxaca
+```
+
+```{r}
+start_day <- as.numeric(as.Date("2020-03-15") - as.Date("2020-01-01"))
+  
+ts_covid_oaxaca <- ts(data_covid_oaxaca$`Daily Cases`,
+                      frequency = 365,
+                      #start = c("2020", start_day)
+                        )
+
+ts_covid_oaxaca
+```
+
+
+```{r}
+# Graficamos
+#ggseasonplot(ts_covid_oaxaca)
+ts_covid_oaxaca %>% 
+  autoplot()
+```
+
+```{r}
+#library(timetk)
+
+data_covid_oaxaca %>% 
+  plot_seasonal_diagnostics( Time , `Daily Cases`, .interactive = T)
+
+
+```
+
+```{r}
+data_covid_oaxaca %>% 
+  plot_acf_diagnostics(Time, `Daily Cases`, .interactive = T, .lags = 16)
+```
+
+# AR 
+
+$$ Yy_{t} = c + \phi_{1}y_{t-1} + \phi_{2}y_{t-2} + \dots + \phi_{p}y_{t-p} + \varepsilon_{t} $$
+## AR(1)
+
+Modelo de autorregresión con un periodo de retardo (lag)
+```{r}
+ar.ols(ts_covid_oaxaca,
+       order.max = 1,
+       intercept = T,
+       demean = F
+       )
+```
+
+```{r}
+N <- length(ts_covid_oaxaca)
+
+ts_covid_oaxaca_level <- ts_covid_oaxaca[-1]
+ts_covid_oaxaca_lag <- ts_covid_oaxaca[-N]
+```
+
+```{r}
+ar_mod <- lm(ts_covid_oaxaca_level ~ ts_covid_oaxaca_lag)
+ar_mod
+```
+
+# AR(2)
+Modelo de autorregresión con dos periodo de retardo (lag)
+
+```{r}
+ar.ols(ts_covid_oaxaca,
+       order.max = 2,
+       intercept = T,
+       demean = F
+       )
+```
+
+## AR(p)
+
+# MA(q) media movíl
+
+$$ y_{t} = c + \varepsilon_t + \theta_{1}\varepsilon_{t-1} + \theta_{2}\varepsilon_{t-2} + \dots + \theta_{q}\varepsilon_{t-q} $$
+
+# ARIMA
+
+$$  y'_{t} = c + \phi_{1}y'_{t-1} + \cdots + \phi_{p}y'_{t-p}
+     + \theta_{1}\varepsilon_{t-1} + \cdots + \theta_{q}\varepsilon_{t-q} + \varepsilon_{t} $$
+
+ARIMA(p, i, q)
+
+ARIMA(1, 0, 0) = AR(1)
+ARIMA(0, 0, 1) = MA(1)
+ARIMA(0, 1, 0) = caminata aleatoria
+ARIMA(0, 0, 0) = Ruido blanco
+
+```{r}
+library(fpp2)
+```
+
+```{r}
+autoplot(uschange[ , "Consumption"]) +
+  labs(x="year", y="Cambio porcentual por trimestre")
+```
+
+```{r}
+# Ajustamos de forma automática un modelo ARIMA 
+fit <- auto.arima(uschange[ , "Consumption"],
+                  seasonal = FALSE
+                  )
+fit
+```
+
+```{r}
+fit %>% 
+  forecast(h = 10) %>% 
+  autoplot()
+  
+```
+
+```{r}
+# Ajustamos un modelo ARIMA de forma manual
+fit_manual <- arima(
+  uschange[ , "Consumption"],
+  #seasonal = F,
+  order = c(1, 0, 2)
+)
+fit_manual
+```
+
+```{r}
+ggAcf(uschange[ , "Consumption"])
+```
+
+```{r}
+qtr_seq <- seq(as.Date("1970-03-01"), 
+               by = "quarter",
+               length.out = nrow(uschange))
+
+consumo_data <- data_frame(Time = qtr_seq,
+                           Consumption = uschange[ , "Consumption"])
+
+consumo_data %>% 
+plot_acf_diagnostics(Time, Consumption, .lags = 20)
+
+consumo_data %>% 
+  plot_seasonal_diagnostics(Time, Consumption)
+```
+
+# SARIMA
+
+```{r}
+ts_empleo_informal
+
+
+fi_sarima <- auto.arima(AirPassengers, seasonal = T)
+
+fi_sarima %>% 
+  forecast(h = 10) %>% 
+  autoplot() 
+```
+
+
+
+
+
+
+
+
+

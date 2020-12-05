@@ -1,0 +1,82 @@
+---
+title: "R Notebook"
+output: html_notebook
+author:
+  - name: "Alonso Melgar López"
+    url: https://github.com/alonmar
+---
+
+# Carga de librerias
+
+```{r}
+library(tidyverse)
+library(gapminder)
+```
+
+```{r}
+head(gapminder)
+```
+
+# geom_point()
+
+```{r}
+gapminder %>% 
+  ggplot() +
+  geom_point(aes(x=gdpPercap, y = lifeExp),
+             col = "red",
+             size = 0.5,
+             alpha = .09
+             )
+  
+```
+
+```{r}
+gapminder %>% 
+  ggplot() +
+  geom_point(aes(x=gdpPercap, y = lifeExp, color = continent),
+             #size = 0.5,
+             #alpha = .09
+             )
+```
+
+```{r}
+gapminder %>% 
+  ggplot() +
+  geom_point(aes(x=gdpPercap,
+                 y = lifeExp,
+                 shape = continent,
+                 color = continent),
+             #size = 0.5,
+             #alpha = .09
+             )
+```
+
+```{r}
+gapminder %>% 
+  ggplot() +
+  geom_line( aes(x=year, 
+                 y=lifeExp, 
+                 group = country,
+                 color = continent), show.legend = F) 
+```
+
+# geom_line()
+
+```{r}
+gapminder %>% 
+  ggplot() +
+  geom_bar(aes(x = continent, fill = continent),
+           color = "black")
+```
+
+```{r}
+gapminder %>% 
+  ggplot() +
+  geom_point(aes(x=gdpPercap, y = lifeExp, size = pop, color = continent),
+             alpha = 0.5) +
+  facet_grid(~ continent)
+# guardamos nuestra grafica
+ggsave("mi_bonita_grafica.png")
+```
+
+

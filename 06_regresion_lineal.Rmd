@@ -1,0 +1,200 @@
+---
+title: "R Notebook"
+author: "Alonso Melgar López"
+output:
+  pdf_document: default
+  html_notebook: default
+---
+# Cargamos librerias
+
+```{r}
+library(tidyverse)
+library(corrplot)
+```
+
+# Cargamos datos
+
+```{r}
+houses <- read_csv("data/casas_boston - casas_boston.csv")
+houses
+```
+
+# Medidas de tendencia central
+
+## Media
+```{r}
+mean(houses$medv)
+```
+
+## mediana 
+
+```{r}
+median(houses$medv)
+```
+
+### ejemplo
+
+```{r}
+x <- c(2, 2, 4, 5, 1000000)
+
+mean(x)
+median(x)
+```
+
+```{r}
+ggplot() +
+  geom_boxplot(data = houses, aes(medv))
+
+```
+
+## summary
+
+```{r}
+summary(houses)
+```
+
+# Regresión simple
+
+```{r}
+m <- cor(houses)
+corrplot::corrplot(m, type = "lower")
+```
+
+$$ y = b_0 + b_1x  $$
+
+```{r}
+recta_fun <- function(b0, b1, x) {
+  y <- b0 + b1*x
+  recta <- data.frame(x, y)
+  return(recta)
+}
+```
+
+```{r}
+x <- 5:9
+recta_1 <- recta_fun(b0 = -40, b1 = 12, x)
+recta_2 <- recta_fun(b0 = -50, b1 = 12, x)
+recta_3 <- recta_fun(b0 = -60, b1 = 12, x)
+
+ggplot() +
+  geom_point(data = houses, aes(x=phab, y=medv)) +
+  geom_line(data = recta_1, aes(x=x,y=y), color = "red") +
+  geom_line(data = recta_2, aes(x=x,y=y), color = "blue") +
+  geom_line(data = recta_3, aes(x=x,y=y), color = "green") 
+```
+
+# Modelo de regresión lineal
+
+$$ Y_i = \beta_0 + \beta_1 X_i + u_i  $$
+
+# función de costo
+
+$$ \sum^n_{i = 1} (Y_i - \widehat{Y_i})^2 $$
+
+$$ \sum^n_{i = 1} (Y_i - (\beta_0  + \beta_1X_i))^2 $$
+
+$$ 
+  \hat\beta_1  = \frac{ \sum_{i = 1}^n (X_i - \overline{X})(Y_i - \overline{Y}) } { \sum_{i=1}^n (X_i - \overline{X})^2}  \\
+  \\
+  \hat\beta_0  =  \overline{Y} - \hat\beta_1 \overline{X} $$
+
+$$ \widehat{Y}_i =  \hat\beta_0 + \hat\beta_1 X_i\\
+  \\
+  \hat{u}_i  =  Y_i - \widehat{Y}_i $$
+  
+# Betas
+
+Calculamos los valores de las betas
+```{r}
+
+beta_1 <- sum(
+  (houses$phab -mean(houses$phab))*(houses$medv-mean(houses$medv))
+  )/sum(
+    (houses$phab-mean(houses$phab))^2
+    )
+
+beta_0 <- mean(houses$medv) - beta_1*mean(houses$phab)
+
+beta_1
+beta_0
+```
+
+Regresión lineal
+```{r}
+lm(data = houses, medv ~ phab)
+```
+
+```{r}
+ggplot() +
+  geom_point(data = houses, aes(x=phab, y=medv)) +
+  geom_abline(slope = 10.45, intercept = -42.26, color = "red")
+```
+
+```{r}
+ggplot(data = houses, aes(x=phab, y=medv)) +
+  geom_point() +
+  geom_smooth(method = "lm", se=T)
+```
+
+# Coeficientes de determinación
+
+## Suma de cuadrados explicado
+
+$$ SSE =  \sum_{i = 1}^n \left( \hat{Y_i} - \overline{Y} \right)^2 $$
+
+## Suma cuadrada total
+
+$$ SST  =  \sum_{i = 1}^n \left( Y_i - \overline{Y} \right)^2  $$
+
+## suma cuadrada de residuos
+
+$$ SSR = \sum_{i=1}^n \hat{u}_i^2 $$
+
+# R2
+
+$$ R^2 = \frac{SSE}{SST} $$
+$$ SST = SSE + SSR $$
+
+$$ R^2 = 1- \frac{SSR}{SST} $$
+
+$$ESR = s_{\hat{u}} = \sqrt{s_{\hat{u}}^2} \\
+\\
+s_{\hat{u} }^2 = \frac{1}{n-2} \sum_{i = 1}^n \hat{u}^2_i = \frac{SSR}{n - 2} $$
+
+# Aplicando a nuestros datos
+
+```{r}
+model <- lm(data = houses, medv ~ phab)
+model_summary <- summary(model)
+model_summary
+```
+
+
+## Calcular R2
+
+```{r}
+reac_predic <- recta_fun(-42.2563, 10.4475, houses$phab)
+
+residuals <- houses$medv - reac_predic$y
+
+SSR <- sum(residuals^2)
+SST <- sum((houses$medv - mean(houses$medv))^2)
+
+R2 <- 1 - SSR/SST
+
+R2
+```
+## Error estándar de regresión
+
+```{r}
+n <- length(houses$medv)
+
+ESR <- sqrt(SSR/(n-2))
+ESR
+```
+
+
+
+
+
+

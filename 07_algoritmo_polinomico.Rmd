@@ -1,0 +1,188 @@
+---
+title: "R Notebook"
+output:
+  pdf_document: default
+  html_notebook: default
+author:
+  - name: "Alonso Melgar López"
+    url: https://github.com/alonmar
+---
+
+# Cargamos librerias
+```{r}
+library(tidyverse)
+library(readxl)
+```
+
+# Carga de datos
+```{r}
+data <- read_xlsx("data/dots.xlsx")
+head(data)
+```
+
+# Graficamos
+
+```{r}
+ggplot() +
+  geom_point(data = data, 
+             aes(x=horas, y=ingreso))
+```
+
+```{r}
+lm(ingreso ~ horas, data = data)
+```
+
+# Sample
+
+```{r}
+set.seed(2020)
+
+sample(10,3)
+```
+
+```{r}
+nrow(data)
+```
+
+```{r}
+set.seed(2020)
+
+indices <- sample(1000, 800)
+```
+
+Dividimos nuestros datos para entrenar y evaluar nuestro modelo,
+esto ayuda a evitar el sobreajuste
+
+```{r}
+train <- data[indices, ]
+test <- data[-indices, ]
+```
+
+```{r}
+ggplot() +
+  geom_point(data = train,
+             aes(x=horas, y=ingreso))
+```
+
+```{r}
+ggplot() +
+  geom_point(data = test,
+             aes(x=horas, y=ingreso))
+```
+
+# lm Train
+
+```{r}
+model <- lm(ingreso ~ horas, data = train)
+model
+```
+
+```{r}
+x <- c(1, 9)
+
+y <- predict(model, data.frame(horas=x))
+
+endpoints <- data.frame(x=x, y=y)
+endpoints
+```
+
+```{r}
+ggplot() +
+  geom_point( data = train, 
+              aes(x=horas,y=ingreso) ) +
+  geom_line(data = endpoints, 
+            aes(x=x,y=y), color = "red") +
+  labs(title = "Train")
+```
+
+# Error cuadratico medio
+
+$$ \frac{1}{n}\sum_{i=1}^{n}\left (\widehat{Y}_{i} - Y_{i} \right )^{2} $$
+
+```{r}
+y_predict <- predict(model, test)
+
+mean((y_predict - test$ingreso)^2)
+
+```
+
+# Modelos polinominales
+
+```{r}
+# y ~ x + x^2
+model <- lm( ingreso ~ horas + I(horas^2), 
+             data = train  )
+model
+```
+
+# error cuadratico medio 
+
+```{r}
+y_predict <- predict(model, test)
+ecm <- mean((y_predict - test$ingreso)^2)
+ecm
+```
+
+```{r}
+f <- function(x) {
+  y_predict <- predict(model, data.frame(horas=x))
+  return(y_predict)
+}
+```
+
+```{r}
+f(x = test$horas)
+```
+
+```{r}
+ggplot() +
+  geom_point(data = train, 
+             aes(x=horas, y=ingreso)) +
+  geom_line(data = endpoints,
+            aes(x=x, y=y), color = "red") +
+  stat_function(data = data.frame(horas=c(1,9)),
+                aes(x=horas), fun = f, color = "blue")
+```
+
+```{r}
+lm(ingreso ~ horas + I(horas^2) + I(horas^3) , data = train)
+```
+
+```{r}
+lm(ingreso ~ poly(horas, 3, raw = T), data = train)
+```
+
+```{r}
+model <- lm(ingreso ~ poly(horas, 1, raw = TRUE), 
+            data = train)
+y_predict <- f(test$horas)
+ecm <- mean((y_predict - test$ingreso)^2)
+ecm
+```
+
+# Creamos un loop
+
+```{r}
+ecm <- c()
+
+for (i in 1:10) {
+  
+  model <- lm(ingreso ~ poly(horas, i, raw = TRUE), data = train)
+  y_predict <- f(test$horas)
+  ecm[i] <- mean((y_predict - test$ingreso)^2)
+}
+```
+
+```{r}
+ecm_poly <- data.frame(grado = 1:10, ecm = ecm)
+ecm_poly
+```
+
+```{r}
+ggplot(data = ecm_poly, aes(x=grado, y=ecm)) +
+  geom_point() +
+  geom_line()
+  
+```
+
+

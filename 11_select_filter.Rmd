@@ -1,0 +1,148 @@
+---
+title: "R Notebook"
+output: html_notebook
+author:
+  - name: "Alonso Melgar López"
+    url: https://github.com/alonmar
+    
+---
+
+# Carga de librerias
+
+```{r}
+library(tidyverse)
+```
+
+# Carga de datos
+
+```{r}
+data_raw <- read_csv("data/oaxaca_de_juares.csv")
+data_raw
+```
+
+```{r}
+summary(data_raw)
+```
+
+```{r}
+names(data_raw)
+```
+
+
+# select()
+
+```{r}
+select(data_raw, EDAD, SEXO)
+```
+
+```{r}
+select(data_raw, SEXO:HLENGUA, 
+       TIE_TRASLADO_TRAB:MED_TRASLADO_TRAB3)
+```
+
+```{r}
+#select(data_raw, starts_with("ACTI"))
+select(data_raw, ends_with("A"))
+```
+
+
+```{r}
+select(data_raw, contains("1"))
+```
+
+# filter()
+
+```{r}
+#filter(data_raw, SEXO == 3)
+#filter(data_raw, ELENGUA == 1, SEXO == 3)
+filter(data_raw, ELENGUA == 1 | ESCOLARI == 1)
+```
+
+```{r}
+arrange(data_raw, desc(HIJOS_FALLECIDOS))
+```
+
+# %>% 
+
+```{r}
+data_raw %>% 
+  arrange(HIJOS_SOBREVIV) %>% 
+  select(SEXO,HIJOS_NAC_VIVOS:FECHA_NAC_A) %>%
+  filter(HIJOS_SOBREVIV != 99)
+```
+
+
+```{r}
+data_raw %>% 
+  head(1)
+```
+
+# group_by()
+# summarise()
+
+```{r}
+data_raw %>% 
+  group_by(SEXO) %>% 
+  summarise(conteo = n(), 
+            media_edad = mean(EDAD))
+  
+```
+# count()
+
+```{r}
+data_raw %>% 
+  count(FECHA_NAC_A)
+```
+
+# mutate()
+# transmute()
+
+```{r}
+data_raw %>% 
+  transmute( REPRESENTA = str_glue("Representa a: {FACTOR}"),
+          PROPORCION_NAC = (HIJOS_SOBREVIV)/(HIJOS_SOBREVIV + HIJOS_FALLECIDOS),
+          PROPORCION_NAC_PRCENTAJE = PROPORCION_NAC*100)
+```
+
+```{r}
+data_raw %>% 
+  filter(EDAD >= 6, EDAD <= 13) %>% 
+  arrange(desc(EDAD))
+```
+
+# stringr
+
+```{r}
+x <- "hola"
+y <- "adios"
+
+str_glue("Un nuevo mensaje {y}")
+```
+
+
+```{r}
+str_detect(fruit, "ap")
+
+fruit[str_detect(fruit, "ap")  ]
+```
+
+
+```{r}
+str_which(fruit, "ap")
+```
+
+```{r}
+str_locate(fruit, "ap")
+```
+
+
+```{r}
+data_raw %>% 
+  #mutate(NOM_ENT = str_replace(NOM_ENT, "Oaxaca", "Oax" )) %>% 
+  #mutate(NOM_ENT = str_remove(NOM_ENT ,"Oaxaca" )) %>% 
+  #mutate(NOM_ENT = str_to_lower(NOM_ENT)) %>% 
+  mutate(NOM_ENT = str_to_upper(NOM_ENT)) %>% 
+  select(NOM_ENT)
+```
+
+
